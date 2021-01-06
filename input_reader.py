@@ -167,6 +167,42 @@ def readFile2020():
             i += 1
         con.commit()
 
+def readFile2008to2015():
+    with open(f"{INPUT_DATA}2008-2017_full.csv", newline="") as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        i = 1
+        for row in spamreader:
+            if i > 1:
+                country = row[0].strip('"')
+                year = int(row[1])
+                try:
+                    happiness = row[2]
+                    economy = row[3]
+                    normalised_economy = (float(economy) - 6.38) / (11.8 - 6.38)
+                    family = row[4]
+                    normalised_family = (float(family) - 0.29) / (0.99 - 0.29)
+                    health = row[5]
+                    normalised_health = (float(health) - 37.8) / (76.5 - 37.8)
+                    freedom = row[6]
+                    normalised_freedom = (float(freedom) - 0.26) / (0.99 - 0.26)
+                    g_trust = row[8]
+                    normalised_trust = 1 - (float(g_trust) - 0.04) / (0.98 - 0.04) # data is inversed -> perception of corruption
+                    generosity = row[7]
+                    generosity = float(generosity) + 0.32 # to up the scala from negative margin
+                    normalised_genero = (float(generosity) - 0) / (0.57 + 0.32 - 0)
+                    cursor.execute(f"SELECT id FROM happiness_schema.happiness WHERE country = '{country}' AND year = {year}") # check to not duplicate data
+                    result = cursor.fetchone()
+                    if not result:
+                        stmt = f"INSERT INTO happiness_schema.happiness (country, year, economy, family, health, freedom, government_trust, happiness_score, generosity) VALUES ('{country}',{year}, {normalised_economy}, {normalised_family}, {normalised_health}, {normalised_freedom}, {normalised_trust}, {float(happiness)}, {normalised_genero})"
+                        cursor.execute(stmt)
+                except:
+                    # if there is no data regarding values just pass row
+                    # print(f"error with {country} {year}  row {i}") Couple of errors due to missing data
+                    pass
+
+            i += 1
+        con.commit()
+
 def main():
     readFile2015()
     readFile2016()
@@ -174,5 +210,6 @@ def main():
     readFile2018()
     readFile2019()
     readFile2020()
+    readFile2008to2015()
     con.close()
 main()
