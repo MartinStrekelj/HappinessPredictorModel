@@ -1,3 +1,4 @@
+import mindsdb
 from mindsdb import Predictor
 
 Predictor(name='Happiness_predictor_py').learn(
@@ -7,8 +8,6 @@ Predictor(name='Happiness_predictor_py').learn(
 
 mdb = mindsdb.Predictor(name='Happiness_predictor_py')
 
-result = Predictor(name='Happiness_predictor_py').predict(when_data={'economy': 0.5, 'health': 0.5, 'government_trust': 0.5})
+result = Predictor(name='Happiness_predictor_py').predict(when_data={'year': 2020, 'health': 0.2, 'generosity': 0.6, 'government_trust': 0.2, 'freedom': 0.3, 'region': "Western Europe", 'economy': 0.7, 'family': 0.8})
 
-print('The predicted price is between ${happiness_score} with {conf} confidence'.format(price=result[0].explanation['happiness_score']['confidence_interval'], conf=result[0].explanation['happiness_score']['confidence']))
-
-## not working :(
+print('The predicted happiness score is between {happiness_score} with {conf} confidence'.format(happiness_score=result[0].explanation['happiness_score']['confidence_interval'], conf=result[0].explanation['happiness_score']['confidence']))
